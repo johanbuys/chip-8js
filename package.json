@@ -1,0 +1,14 @@
+{
+  "name": "chip8js",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Johan Buys",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0-beta.2"
+  }
+}

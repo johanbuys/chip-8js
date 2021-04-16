@@ -1,0 +1,39 @@
+canvas {
+    padding: 0;
+    margin: auto;
+    display: block;
+    width: 640px;
+    height: 320px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border: 1px solid #00ff00;
+    box-sizing: border-box;
+}
+body {
+  background-color: black;
+  color: #00ff00;
+}
+
+#debug-registers > table {
+  border: 1px solid #00ff00;
+}
+
+#debug-trace {
+  max-height: 250px;
+  width: 250px;
+  overflow: auto;
+}
+
+#decode-trace {
+  max-height: 250px;
+  width: 250px;
+  overflow: auto;
+}
+
+.heading {
+  font-family: monospace;
+  font-size: 10rem;
+  text-align: center;
+}

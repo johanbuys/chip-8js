@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chip8-JS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+
+<body>
+  <h1 class="heading">CHIP 8</h1>
+  <canvas id="screen" width="640" height="320"></canvas>
+  <button class='success' id="step">Step</button>
+  <button class='success' id="start">Start</button>
+  <button class='success' id="stop">Stop</button>
+  <button class='success' id="reset">Reset</button>
+  <h2>Registers</h2>
+  <div id="debug-registers">   
+    <table></table>
+  </div>
+<div class="flex">
+  <div>
+      <h2>Instructions</h2>
+      <div id="debug-trace">
+      </div>
+  </div>
+  <div>
+      <h2>Program Data</h2>
+      <div id="decode-trace">
+      </div>
+  </div>
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/umbrellajs"></script>
+  <script src="./index.js"></script>
+</body>
+
+</html>
