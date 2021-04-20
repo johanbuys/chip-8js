@@ -33,6 +33,8 @@ import TEST2 from 'url:./roms/c8_test.c8';
 import maze from 'url:./roms/maze.c8';
 import blinky from 'url:./roms/blinky.c8';
 import octojam1 from 'url:./roms/octojam1title.ch8';
+import davidmaze from 'url:./roms/mazeAlt.c8';
+import Sierpinski from 'url:./roms/Sierpinski.ch8';
 
 const CLOCK_FREQ_HZ = 60;
 const SCALE_FACTOR = 10;
@@ -42,6 +44,8 @@ const stepButton = document.getElementById('step');
 const startButton = document.getElementById('start');
 const stopButton = document.getElementById('stop');
 const resetButton = document.getElementById('reset');
+const debugButton = document.getElementById('debug');
+
 const debugRegistersEle = document.getElementById('debug-registers');
 const debugTraceEle = document.getElementById('debug-trace');
 const decodeElement = document.getElementById('decode-trace');
@@ -53,7 +57,7 @@ const cpu = new Cpu(dbg, SCALE_FACTOR);
 let runTimer;
 
 const loadProgram = () => {
-  fetch(blinky)
+  fetch(Sierpinski)
     .then(
       function (response) {
         if (response.status !== 200) {
@@ -135,6 +139,9 @@ const start = () => {
     runTimer = null;
     cpu.reset();
     loadProgram();
+  };
+  debugButton.onclick = () => {
+    cpu.toggleDebug();
   };
 };
 

@@ -13,6 +13,10 @@ class Cpu {
     this.reset();
   }
 
+  toggleDebug() {
+    this.dbg.enabled = !this.dbg.enabled;
+  }
+
   loadFonts() {
     const FONT = [
       0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -53,10 +57,10 @@ class Cpu {
     });
   }
 
-  loadProgram(programData, config) {
+  loadProgram(programData, config = { shift_quirk: true }) {
     this.memory.set(programData, 0x200);
     this.programLoaded = true;
-    this.shift_quirk = config.shift_quirk || true;
+    this.shift_quirk = config.shift_quirk;
   }
 
   reset() {
