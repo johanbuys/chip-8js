@@ -255,11 +255,6 @@ class Cpu {
 
               let temporary = this.v[y] >> 1;
               this.v[X] = temporary;
-
-              // let mask = 1 << 8;
-              // this.v[X] = this.v[Y];
-              // this.v[0xF] = this.v[X] & mask;
-              // this.v[X] = this.v[X] >> 1
               break;
             }
             case 0x7: {

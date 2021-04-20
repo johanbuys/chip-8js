@@ -26,6 +26,7 @@ Memory Map:
 import Render from './renderer';
 import Cpu from './cpu';
 import Debuger from './debugView';
+import AudioInterface from './AudioInterface';
 
 import IBM from 'url:./roms/ibm.c8';
 import TEST from 'url:./roms/test_opcode.c8';
@@ -51,6 +52,7 @@ const debugRegistersEle = document.getElementById('debug-registers');
 const debugTraceEle = document.getElementById('debug-trace');
 const decodeElement = document.getElementById('decode-trace');
 const dbg = new Debuger(debugRegistersEle, debugTraceEle, decodeElement);
+const audioInterface = new AudioInterface();
 
 // const renderer = new Render(SCALE_FACTOR);
 // const display = new Display(SCALE_FACTOR);
@@ -58,7 +60,7 @@ const cpu = new Cpu(dbg, SCALE_FACTOR);
 let runTimer;
 
 const loadProgram = () => {
-  fetch(ZeroDemo)
+  fetch(blinky)
     .then(
       function (response) {
         if (response.status !== 200) {
@@ -112,6 +114,9 @@ const run = () => {
   runTimer = setInterval(() => {
     if (cpu.soundTimer > 0) {
       cpu.soundTimer -= 1;
+      audioInterface.emitTone("600");
+    } else {
+      audioInterface.stopTone();
     }
     if (cpu.delayTimer > 0) {
       cpu.delayTimer -= 1;
