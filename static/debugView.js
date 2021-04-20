@@ -5,6 +5,7 @@ class Debuger {
     this.debugTraceElement = debugTraceElement;
     this.enabled = true;
     this.logCount = 0;
+    this.opcodeLog = [];
     this.programData = new Uint8Array(4096 - 0x200);
   }
   setProgramData(programData) {
@@ -15,9 +16,9 @@ class Debuger {
       this.decodeElement.innerHTML = `<span id="PD${i}">${value16.toString(16)}</span><br />${this.decodeElement.innerHTML}`
     }
   }
-  setPC(pc) {
-    this.pc = pc;
-    // console.log(pc)
+  addOpcodeToLog(opcode) {
+    // this.opcodeLog.push(opcode);
+    // this.decodeElement.innerText = `${opcode}\n${this.decodeElement.innerText}`;
   }
 
   disable() {

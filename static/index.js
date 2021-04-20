@@ -30,7 +30,9 @@ import Debuger from './debugView';
 import IBM from 'url:./roms/ibm.c8';
 import TEST from 'url:./roms/test_opcode.c8';
 import TEST2 from 'url:./roms/c8_test.c8';
-import rom4 from 'url:./roms/Chip-8 Games/Blitz [David Winter].ch8';
+import maze from 'url:./roms/maze.c8';
+import blinky from 'url:./roms/blinky.c8';
+import octojam1 from 'url:./roms/octojam1title.ch8';
 
 const CLOCK_FREQ_HZ = 60;
 const SCALE_FACTOR = 10;
@@ -45,14 +47,13 @@ const debugTraceEle = document.getElementById('debug-trace');
 const decodeElement = document.getElementById('decode-trace');
 const dbg = new Debuger(debugRegistersEle, debugTraceEle, decodeElement);
 
-const renderer = new Render(SCALE_FACTOR);
-renderer.testRender();
-renderer.render();
-const cpu = new Cpu(dbg, renderer);
+// const renderer = new Render(SCALE_FACTOR);
+// const display = new Display(SCALE_FACTOR);
+const cpu = new Cpu(dbg, SCALE_FACTOR);
 let runTimer;
 
 const loadProgram = () => {
-  fetch(TEST)
+  fetch(blinky)
     .then(
       function (response) {
         if (response.status !== 200) {

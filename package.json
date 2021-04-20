@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "parcel": "^2.0.0-beta.2"
+  },"scripts": {
+    "dev": "parcel ./static/index.html",
+    "build": "parcel build ./static/index.html"
   }
 }

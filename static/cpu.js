@@ -1,3 +1,4 @@
+import Display from './display';
 /*
   0x000-0x1FF - Chip 8 interpreter (contains font set in emu)
   0x050-0x0A0 - Used for the built in 4x5 pixel font set (0-F)
@@ -5,9 +6,10 @@
 */
 
 class Cpu {
-  constructor(dbg, renderer) {
+  constructor(dbg, SCALE_FACTOR) {
     this.dbg = dbg;
-    this.renderer = renderer;
+    // this.renderer = renderer;
+    this.display = new Display(SCALE_FACTOR);
     this.reset();
   }
 
@@ -51,10 +53,10 @@ class Cpu {
     });
   }
 
-  loadProgram(programData) {
+  loadProgram(programData, config) {
     this.memory.set(programData, 0x200);
-    this.dbg.setProgramData(programData);
     this.programLoaded = true;
+    this.shift_quirk = config.shift_quirk || true;
   }
 
   reset() {
@@ -65,14 +67,17 @@ class Cpu {
     this.i = 0; // I Address
     this.pc = 0x200; // Program counter starts executing at 0x200
     this.opcode = 0; // Current OPCode
-    this.stack = [];
+    this.stack = new Uint16Array(16);
+    this.stackPointer = -1;
+    this.opcodeLog = [];
+    this.shift_quirk = true;
 
 
     this.soundTimer = 0;
     this.delayTimer = 0;
-    if (this.renderer) {
-      this.renderer.clear();
-      this.renderer.render();
+    if (this.display) {
+      this.display.clear();
+      this.display.update();
     }
   }
 
@@ -101,10 +106,10 @@ class Cpu {
 
     if (this.pc >= 4095) {
       console.log("Halt and catch fire");
+      throw new Error("MEMORY OUT OF BOUNDS");
     } else {
       const byte1 = this.memory[this.pc];
       const byte2 = this.memory[this.pc + 1];
-      this.dbg.setPC(this.pc);
       this.pc += 2;
       const value16 = byte1 << 8 | byte2;
       this.opcode = value16;
@@ -115,17 +120,20 @@ class Cpu {
       const X =  (this.opcode & 0x0F00) >> 8;
       const Y =  (this.opcode & 0x00F0) >> 4;
       this.dbg.updateRegisters(this.v);
-      this.dbg.log(`PC: ${this.pc.toString(16)}: OPCODE: ${this.opcode.toString(16)} I: ${this.i.toString(16)} MEM: ${this.memory[this.i].toString(16)}`)
       
+      this.dbg.log(`PC: ${this.pc.toString(16)}: OPCODE: ${this.opcode.toString(16)} I: ${this.i.toString(16)} MEM: ${this.memory[this.i].toString(16)}`);
+      this.dbg.addOpcodeToLog(value16.toString(16))
 
       switch (opcprefix) {
         case 0x0: {
           if (this.opcode === 0xe0) {
-            this.renderer.clear();
-            this.renderer.render();
+            this.display.clear()
+            this.display.update();
           }
           if (this.opcode === 0x00EE) {
-            this.pc = this.stack.pop();
+            this.pc = this.stack[this.stackPointer];
+            this.stackPointer -= 1;
+            // this.pc = this.stack.pop();
           }
           break;
         }
@@ -135,7 +143,9 @@ class Cpu {
           break;
         }
         case 0x2000: {
-          this.stack.push(this.pc);
+          this.stackPointer += 1;
+          this.stack[this.stackPointer] = this.pc;
+          // this.stack.push(this.pc);
           this.pc = NNN;
           break;
         }
@@ -163,13 +173,11 @@ class Cpu {
         case 0x6000: {
           // 6XNN	Store number NN in register VX
           this.v[X] = NN;
-          console.log('X:', X.toString(16), ' NN:', NN.toString(16), 'v[X]', this.v[X].toString(16));
           break;
         }
         case 0x7000: {
           // 7XNN Add the value NN to register VX
           this.v[X] = this.v[X] + NN;
-          console.log('X:', X.toString(16), ' NN:', NN.toString(16), 'v[X]', this.v[X].toString(16));
           break;
         }
         case 0x8000: {
@@ -238,10 +246,16 @@ class Cpu {
                 3. Set VF to 1 if the bit that was shifted out was 1, or 0 if it was 0
               */
               // this.dbg.log("8XY6 ", this.opcode.toString(16), X, Y);
-              let mask = 1 << 8;
-              this.v[X] = this.v[Y];
-              this.v[0xF] = this.v[X] & mask;
-              this.v[X] = this.v[X] >> 1
+              let y = this.shift_quirk ? X : Y;
+              this.v[0xF] = this.v[y] & 0x01;
+
+              let temporary = this.v[y] >> 1;
+              this.v[X] = temporary;
+
+              // let mask = 1 << 8;
+              // this.v[X] = this.v[Y];
+              // this.v[0xF] = this.v[X] & mask;
+              // this.v[X] = this.v[X] >> 1
               break;
             }
             case 0x7: {
@@ -264,10 +278,10 @@ class Cpu {
                       Set register VF to the most significant bit prior to the shift
                       VY is unchanged
               */
-              // this.dbg.log("8XYE ", this.opcode.toString(16), X, Y);
-              let mask = 1 >> 8;
-              this.v[0xF] = this.v[Y] & mask;
-              this.v[X] = this.v[Y] << 1;
+              let y = this.shift_quirk ? X : Y;
+              this.v[0xF] = this.v[y] & 0x01;
+              let temporary = this.v[y] << 1;
+              this.v[X] = temporary;
               break;
             }
             default:
@@ -304,8 +318,44 @@ class Cpu {
           Draw a sprite at position VX, VY with N bytes of sprite data starting at the address stored in I
           Set VF to 01 if any set pixels are changed to unset, and 00 otherwise
           */
-          this.v[0xF] = this.renderer.drawSprite(this.v[X], this.v[Y], this.memory.slice(this.i, this.i + N));
-          this.renderer.render();
+          // this.v[0xF] = 
+          // this.renderer.drawSprite(this.v[X], this.v[Y], this.memory.slice(this.i, this.i + N));
+          
+          // const spriteData = this.memory.slice(this.i, this.i + N);
+          this.v[0xf] = 0;
+          // drawSprite(x, y, spriteData) {
+
+          for (let i = 0; i < N; i++) {
+            let line = this.memory[this.i + i]
+            // Each byte is a line of eight pixels
+            for (let position = 0; position < 8; position++) {
+              // Get the byte to set by position
+              let value = line & (1 << (7 - position)) ? 1 : 0
+              // If this causes any pixels to be erased, VF is set to 1
+              const xCord = (this.v[X] + position) % 64 // wrap around width
+              const yCord = (this.v[Y] + i) % 32;
+              if (this.display.setPixel(xCord, yCord, value)) {
+                this.v[0xf] = 1
+              }
+            }
+          }
+
+
+            // for (let i = 0; i < N; i++) {
+            //   const line = this.memory[this.i + i];
+            //   let bit = 0;
+            //   for (let k = 7; k >= 0; k -= 1) {
+            //     let mask = 1 << k;
+            //     let value = line & mask;
+            //     if (this.display.setPixel(xCord + bit, yCord + i, value)) {
+            //       this.v[0xf] = 1;
+            //     }
+            //     bit += 1;
+            //   }
+            // }
+          //   return unset;
+          // }
+          this.display.update();
           break;
         }
         case 0xE000: {
@@ -372,7 +422,6 @@ class Cpu {
               let hundredes = Math.floor((this.v[X] / 100) % 10);
               let tens = Math.floor((this.v[X] / 10) % 10);
               let ones = Math.floor(this.v[X] % 10);
-              console.log(this.opcode.toString(16), this.v[X], hundredes, tens, ones);
               this.memory[this.i] = hundredes;
               this.memory[this.i + 1] = tens;
               this.memory[this.i + 2] = ones;

@@ -14,24 +14,39 @@ class Renderer {
 
   }
 
-  setPixel(x, y) {
-    if (x > this.cols) {
-      x -= this.cols;
-    } else if (x < 0) {
-      x += this.cols;
-    }
-
-    if (y > this.rows) {
-      y -= this.rows;
-    } else if (y < 0) {
-      y += this.rows;
-    }
-
+  setPixel(x, y, value) {
     let pixelLoc = x + (y * this.cols);
-    this.display[pixelLoc] ^= 1;
+    this.display[pixelLoc] ^= value;
 
     return !this.display[pixelLoc];
   }
+
+  // drawPixel(x, y, value) {
+  //   // If collision, will return true
+  //   const collision = this.frameBuffer[y][x] & value
+  //   // Will XOR value to position x, y
+  //   this.frameBuffer[y][x] ^= value
+
+  //   if (this.frameBuffer[y][x]) {
+  //     this.context.fillStyle = COLOR
+  //     this.context.fillRect(
+  //       x * this.multiplier,
+  //       y * this.multiplier,
+  //       this.multiplier,
+  //       this.multiplier
+  //     )
+  //   } else {
+  //     this.context.fillStyle = 'black'
+  //     this.context.fillRect(
+  //       x * this.multiplier,
+  //       y * this.multiplier,
+  //       this.multiplier,
+  //       this.multiplier
+  //     )
+  //   }
+
+  //   return collision
+  // }
 
   clear() {
     this.display = new Array(this.cols * this.rows);
@@ -115,6 +130,14 @@ class Renderer {
     for (let index = 0; index < FONT.length - 15; index += 5) {
       this.drawSprite(index, 14, FONT.slice(index, index + 5));
     }
+  }
+
+  testCollision() {
+    console.log('SET PIX', this.setPixel(10, 10));
+    console.log('SET PIX AGIN', this.setPixel(10, 10));
+    this.setPixel(20,20);
+    this.render();
+
   }
 }
 

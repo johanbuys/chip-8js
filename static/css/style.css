@@ -28,8 +28,10 @@ body {
 
 #decode-trace {
   max-height: 250px;
+  height: 100px;
   width: 250px;
   overflow: auto;
+  background-color: black;
 }
 
 .heading {
