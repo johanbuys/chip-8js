@@ -35,6 +35,7 @@ import blinky from 'url:./roms/blinky.c8';
 import octojam1 from 'url:./roms/octojam1title.ch8';
 import davidmaze from 'url:./roms/mazeAlt.c8';
 import Sierpinski from 'url:./roms/Sierpinski.ch8';
+import ZeroDemo from 'url:./roms/ZeroDemo.ch8';
 
 const CLOCK_FREQ_HZ = 60;
 const SCALE_FACTOR = 10;
@@ -57,7 +58,7 @@ const cpu = new Cpu(dbg, SCALE_FACTOR);
 let runTimer;
 
 const loadProgram = () => {
-  fetch(Sierpinski)
+  fetch(ZeroDemo)
     .then(
       function (response) {
         if (response.status !== 200) {
